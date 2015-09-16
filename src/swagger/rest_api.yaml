@@ -1,0 +1,260 @@
+swagger: '2.0'
+info:
+  description: >
+    An EMC Avamar REST API documentation with Swagger
+  version: 7.1.0
+  title: Avamar API
+  termsOfService: 'https://opensource.org/licenses/MIT'
+  contact:
+    name: dumitru.taraianu@emc.com
+  license:
+    name: MIT
+    url: 'https://opensource.org/licenses/MIT'
+host: localhost
+basePath: /rest-api
+schemes:
+  - http
+paths:
+  /admin/provider/{providerId}/resourcePool:
+    post:
+      tags:
+        - resourcePool
+        - provider
+      summary: Add a new resource pool
+      description: A resource pool is a logical grouping of Avamar servers
+      operationId: addResourcePool
+      consumes:
+        - application/xml
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: providerId
+          description: ID of the provider where the resource pool is created
+          required: true
+          type: string
+        - in: body
+          name: body
+          description: Resource Pool object that needs to be created
+          required: true
+          schema:
+            $ref: '#/definitions/resourcePool'
+      responses:
+        '201':
+          description: Valid
+  /admin/resourcePool/{resourcePoolId}/dataProtectionResource:
+    post:
+      tags:
+        - dataProtectionResource
+      summary: Add a new data protection resource to a resource pool
+      description: The Avamar REST API uses the term "data protection resource" to refer to an Avamar system. When you configure the Avamar REST API server you provide information about the Avamar systems that the Avamar REST API server will manage as data protection resources. In defining a data protection resource you specify user credentials for an account with administrative access to that Avamar system. As a recommended best practice, you can create a dedicated administrative account, such as "rest-api", on each Avamar system. Then use that account when you configure the Avamar system as a data protection resource. This makes it easy for you to determine on the Avamar system which operations originated from the Avamar REST API server.
+      operationId: addDataProtectionResource
+      consumes:
+        - application/xml
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: resourcePoolId
+          description: ID of a resource pool that owns the data protection resource (the Avamar server)
+          required: true
+          type: string
+        - in: body
+          name: body
+          description: Data Protection Resource object that needs to be created
+          required: true
+          schema:
+            $ref: '#/definitions/dataProtectionResource'
+      responses:
+        '201':
+          description: Valid
+  /admin/provider/{providerId}/tenant:
+    post:
+      tags:
+        - tenant
+      summary: Add a new tenant to a provider
+      description: A tenant represents a consumer of the data protection resources. A service provider deployment will usually have a separate tenant defined for each of the provider customers and will make resource assignments based on the business requirements of each customer. In contrast, an enterprise deployment might allow a single tenant to have access to all of the provider's data protection resources.
+      operationId: addTenant
+      consumes:
+        - application/xml
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: providerId
+          description: ID of the provider where the resource pool is created
+          required: true
+          type: string
+        - in: body
+          name: body
+          description: Tenant object that needs to be created
+          required: true
+          schema:
+            $ref: '#/definitions/tenant'
+      responses:
+        '201':
+          description: Valid
+  /admin/resourcePool/{resourcePoolId}/resourceShare:
+    post:
+      tags:
+        - resourceShare
+      summary: Add a new resource share to a resource pool
+      description: You create a resource share for a tenant in a resource pool. This associates the data protection resources from the resource pool with the tenant's resource share.
+      operationId: addResourceShare
+      consumes:
+        - application/xml
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: resourcePoolId
+          description: ID of a resource pool that owns the resource share
+          required: true
+          type: string
+        - in: body
+          name: body
+          description: Resource Share object that needs to be created
+          required: true
+          schema:
+            $ref: '#/definitions/resourceShare'
+      responses:
+        '201':
+          description: Valid
+  /resourceShare/{resourceShareId}/folder:
+    post:
+      tags:
+        - folder
+        - resourceShare
+      summary: Add a new folder
+      description: After creating a resource share, create a resource share folder for it. When you create a resource share folder the Avamar REST API creates a domain with the same name on the Avamar servers in the resource pool.
+      operationId: addFolder
+      consumes:
+        - application/xml
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: resourceShareId
+          description: ID of the resource share
+          required: true
+          type: string
+        - in: body
+          name: body
+          description: Folder object that needs to be created
+          required: true
+          schema:
+            $ref: '#/definitions/folder'
+      responses:
+        '201':
+          description: Valid
+  /folder/{folderId}/client:
+    post:
+      tags:
+        - folder
+        - client
+      summary: Add a new client to folder
+      description: The Avamar REST CLI Create Client operation creates the clients record on the Avamar REST API server and adds the client to a tenant's folder. When you add a client to a tenants folder you register the client with the Avamar server associated with the folder.
+      operationId: addClient
+      consumes:
+        - application/xml
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: folderId
+          description: ID of the folder
+          required: true
+          type: string
+        - in: body
+          name: body
+          description: Client object that needs to be created
+          required: true
+          schema:
+            $ref: '#/definitions/client'
+      responses:
+        '201':
+          description: Valid
+securityDefinitions:
+  internalApiKey:
+    type: apiKey
+    in: header
+    name: X-Concerto-Authorization
+definitions:
+  resourcePool:
+    type: object
+    properties:
+      name:
+        type: string
+      description:
+        type: string
+  dataProtectionResource:
+    type: object
+    properties:
+      name:
+        type: string
+      description:
+        type: string
+      user:
+        type: string
+      password:
+        type: string
+      protocol:
+        type: string
+      hostname:
+        type: string
+      path:
+        type: string
+      port:
+        type: integer
+        format: int32
+  folder:
+    type: object
+    properties:
+      name:
+        type: string
+      description:
+        type: string
+      resourcePool:
+        type: string
+      resourceShare:
+        type: string
+  tenant:
+    type: object
+    properties:
+      name:
+        type: string
+      description:
+        type: string
+  resourceShare:
+    type: object
+    properties:
+      name:
+        type: string
+      description:
+        type: string
+      capacityInMB:
+        type: integer
+        format: int32
+      dataProtectionResource:
+        type: string
+      tenant:
+        type: string
+  client: 
+    type: object
+    properties:
+      name:
+        type: string
+      description:
+        type: string
+      contact:
+        type: string
+      phone:
+        type: string
+      email:
+        type: string
+      location:
+        type: string
+      tenant:
+        type: string
+      resourceShare:
+        type: string
